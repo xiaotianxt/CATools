@@ -9,6 +9,8 @@ import logging
 import datetime
 from dbConnect import *
 from config_parser import *
+from sender import *
+
 def encoded_words_to_text(encoded_words):
     encoded_word_regex = r'=\?{1}(.+)\?{1}([B|Q])\?{1}(.+)\?{1}='
     charset, encoding, encoded_text = re.match(encoded_word_regex, encoded_words).groups()
@@ -23,9 +25,19 @@ def get_mail_info(mail):
     realsubject = ""
     for sub in subject.split():
         realsubject += encoded_words_to_text(sub)
-
+    from_addr_regex = r'[\s\S]*<([\s\S]*)>[\s\S]*'
+    addr = re.match(from_addr_regex, mail.get("From")).groups()[0]
+   
     date = mail.get("Date")
-    return realsubject, date
+
+    return realsubject, date, addr
+
+def get_file_name(rawfilename):
+    real_file_name = ""
+    for name in rawfilename.split():
+        real_file_name += encoded_words_to_text(name)
+    
+    return real_file_name
 
 def get_student_info(subject):
     studentid_regex = r'(^[0-9]{10})([^0-9][\s\S]*)作业([\s\S]+)[(（]([^()（）]*)[)）$]'
@@ -65,9 +77,12 @@ def check_email():
         resp, data = mail.fetch(emailid, "(BODY.PEEK[])")
         email_body = data[0][1]
         mail = email.message_from_bytes(email_body)
-        subject, date = get_mail_info(mail)
+        subject, date, addr = get_mail_info(mail)
         
         subject, info = get_student_info(subject)
+        if info is None :
+            logging.info("No homework recieved.")
+            return
         if check_exist(info[0], date) is True:
             continue
         if mail.get_content_maintype() != 'multipart':
@@ -75,10 +90,12 @@ def check_email():
         for part in mail.walk():
             if part.get_content_maintype() != 'multipart' and part.get('Content-Disposition') is not None:
                 logging.info("New file found: " + subject)
-                filetype = encoded_words_to_text(part.get_filename()).split('.')[-1]
+                filename = get_file_name(part.get_filename())
+                filetype = filename.split('.')[-1]
                 if (filetype not in ["zip", "rar", "7z"]):
                     # TODO: 发送一个邮件格式不对的
                     logging.warning("Uncorrect Format: " + subject)
+                    send_email(addr, TYPE.WRONGTYPE, ())
 
                 file_location = outputdir + subject +'.' + filetype
                 open(file_location, 'wb').write(part.get_payload(decode=True))

@@ -2,7 +2,7 @@ import sqlite3
 import logging
 
 def connect_database():
-    conn = sqlite3.connect('emails.db')
+    conn = sqlite3.connect('data/emails.db')
     cursor = conn.cursor()
     return conn, cursor
 
