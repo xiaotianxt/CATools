@@ -1,14 +1,9 @@
 import jieba
 import re
 import num_parser
+from config_parser import *
 import logging
 import time, datetime
-import configparser
-
-def get_config_info():
-    config = configparser.ConfigParser()
-    config.read("config.ini")
-    return config
 
 def set_logging():
     logging.basicConfig(
