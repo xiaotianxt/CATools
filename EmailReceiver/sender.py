@@ -9,20 +9,20 @@ from enum import Enum
 
 class TYPE(Enum):
     SUCCESS = 1
-    SAMEFILE = 2
+    UPDATEFILE = 2
     WRONGTYPE = 3
     NOTRECEIVED = 4
 
 CONTENT = {
     TYPE.SUCCESS: "已成功收到您的作业！\n  姓名：%s\n  学号：%d\n  文件名：%s\n  发送时间：%s",
-    TYPE.SAMEFILE: "文件已更新！\n  姓名：%s\n  学号：%d\n  文件名：%s\n  发送时间：%s",
+    TYPE.UPDATEFILE: "文件已更新！\n  姓名：%s\n  学号：%d\n  文件名：%s\n  发送时间：%s",
     TYPE.WRONGTYPE: "文件格式似乎有误，请重新发送正确版本！",
     TYPE.NOTRECEIVED: "此邮件为定时发送，作业提交时间为%s，您还有%s可以完成！"
 }
 
 TITLE = {
     TYPE.SUCCESS: "【自动回复】作业已收到",
-    TYPE.SAMEFILE: "【自动回复】作业已更新",
+    TYPE.UPDATEFILE: "【自动回复】作业已更新",
     TYPE.WRONGTYPE: "【自动回复】作业已收到，文件格式有误",
     TYPE.NOTRECEIVED: "【定时发送】作业上交提醒"
 }
