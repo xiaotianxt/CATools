@@ -10,9 +10,9 @@ import datetime
 from dbConnect import *
 from config_parser import *
 from sender import *
+from info_parser import *
 
 def encoded_words_to_text(encoded_words):
-    print(encoded_words)
     encoded_word_regex = r'=\?{1}(.+)\?{1}([B|Q|b|q])\?{1}(.+)\?{1}='
     match = re.match(encoded_word_regex, encoded_words)
     if match is not None:
@@ -32,9 +32,7 @@ def get_mail_info(mail):
         realsubject += encoded_words_to_text(sub)
     from_addr_regex = r'[\s\S]*<([\s\S]*)>[\s\S]*'
     addr = re.match(from_addr_regex, mail.get("From")).groups()[0]
-   
     date = mail.get("Date")
-
     return realsubject, date, addr
 
 def get_file_name(rawfilename):
@@ -44,44 +42,56 @@ def get_file_name(rawfilename):
     
     return real_file_name
 
-def get_student_info(subject):
-    studentid_regex = r'(^[0-9]{10})([^0-9][\s\S]*)作业([\s\S]+)[(（]([^()（）]*)[)）$]'
-    subject = subject.replace(' ', '').replace('\n','').replace('\t', '').replace('）', ')').replace('（', "(")
-    answer = re.match(studentid_regex, subject) # 删除多余的空格
-    if (answer):
-        answer = list(answer.groups())
-        if re.match("[0-9]+", answer[2]) is None:
-            answer[2] = str(num_parser.ch2num(answer[2]))
-        subject = "".join(answer[0:2]) + "作业" + answer[2] + "("+ answer[3] +")"
-        return subject, list(answer)
-    else:
-        return subject, None
 
 def get_file(mail, subject, addr, info, date):
+    logging.info("=============GET FILE==========")
+
+    logging.info("get_file from:" + addr)
     config = get_config_info()
     outputdir = config['system']['outputdir']
     course = config['course']['name']
+    files = []
+    file_types = []
+    file_locations = []
+    file_names = []
     for part in mail.walk():
         if part.get_content_maintype() != 'multipart' and part.get('Content-Disposition') is not None:
             logging.info("New file found in mail: " + subject)
-            filetype = get_file_name(part.get_filename()).split('.')[-1]
-            send_type = check_status(info, date, subject, filetype)
-            if send_type[0] == TYPE.SUCCESS or send_type[0] == TYPE.UPDATEFILE:
-                file_location = outputdir + subject +'.' + filetype
-                open(file_location, 'wb').write(part.get_payload(decode=True))
-                add_item(info, course, file_location, date)
-            send_email(addr, send_type[0], send_type[1])
+            
+                # TODO: 这里本来是 1. 确定文件名称和存放位置 2. 保存文件 3. 数据库添加
+                # file_location = outputdir + subject + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") +'.' + filetype
+                # open(file_location, 'wb').write(part.get_payload(decode=True))
+                # add_item(info, course, file_location, date)
+            files.append(part)
+
+    for index, raw_file in enumerate(files):
+        file_name = get_file_name(raw_file.get_filename())
+        file_type = file_name.split('.')[-1]
+        file_names.append(file_name)
+        file_types.append(file_type)
+        file_locations.append(outputdir + subject + "_" + str(index+1) + "." + file_type)
+    logging.info(file_types)
+    logging.info(file_names)
+    logging.info(file_locations)
+    send_info = check_status(info, date, subject, file_types, ", ".join(file_names), file_locations)
+    if (send_info[0] != TYPE.WRONGTYPE):
+        add_item(info, course, ";".join(file_locations), date)
+        for item in zip(files, file_locations):
+            open(item[1], 'wb').write(item[0].get_payload(decode=True))
+    send_email(info[0], addr, send_info[0], send_info[1])
 
 def check_file(mail, emailid):
+    logging.info("=============CHECK FILE==========")
+    logging.info("fetching mails")
     resp, data = mail.fetch(emailid, "(BODY.PEEK[])")
     email_body = data[0][1]
     mail = email.message_from_bytes(email_body)
     subject, date, addr = get_mail_info(mail)
-    subject, info = get_student_info(subject)
+    subject, info = get_student_info(subject, get_config_info()['course']['name'])
     if info is None :
         logging.info("No homework recieved.")
         return False
-    if check_exist(info[0], date) is True:
+    if check_exist(info[1], date) is True:
         logging.info("Still same file.")
         return False
     if mail.get_content_maintype() != 'multipart':
@@ -89,28 +99,73 @@ def check_file(mail, emailid):
     get_file(mail, subject, addr, info, date)
     return True
         
-def check_email():
-    logging.info("Checking emails")
+def check_email(num):
+    logging.info("=============CHECK EMAILS==========")
     config = get_config_info()
     email_user = config['email']['id']
     email_pass = config['email']['pass']
     email_host = config['email']['host_imap']
     email_port = int(config['email']['port_imap'])
-    
-    EMAIL_NUMBER = 1 # only receive first 10 emails.
 
     mail = imaplib.IMAP4_SSL(email_host,email_port)
     mail.login(email_user, email_pass)
-    logging.info("logging successfully")
+    logging.info("Login successfully")
     mail.select()
 
     typ, data = mail.search(None, "ALL")
     mail_ids = data[0]
-    id_list = mail_ids.split()[-1:-EMAIL_NUMBER-1:-1]
+    id_list = mail_ids.split()[-num:]
 
     for emailid in id_list:
+        logging.info("Checking email_id: " + str(emailid))
         check_file(mail, emailid)
 
     mail.close()
     mail.logout()
         
+def check_num_email():
+    logging.info("=============CHECK THE NUMBER OF EMAILS==========")
+    config = get_config_info()
+    email_user = config['email']['id']
+    email_pass = config['email']['pass']
+    email_host = config['email']['host_imap']
+    email_port = int(config['email']['port_imap'])
+
+    mail = imaplib.IMAP4_SSL(email_host,email_port)
+    mail.login(email_user, email_pass)
+    logging.info("Login successfully")
+    mail.select()
+
+    typ, data = mail.search(None, "ALL")
+    num_mails = len(data[0].split())
+    logging.info(str(num_mails) + " mails currently.")
+    return num_mails
+
+def logging_config():
+    logging.basicConfig(
+                        level    = logging.DEBUG,              # 定义输出到文件的log级别，                                                            
+                        format   = '%(asctime)s  %(filename)s : %(levelname)s  %(message)s',    # 定义输出log的格式
+                        datefmt  = '%Y-%m-%d %A %H:%M:%S',                                     # 时间
+                        filename = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '.log',                # log文件名
+                        filemode = 'w')
+     # Define a Handler and set a format which output to console
+    console = logging.StreamHandler()                  # 定义console handler
+    console.setLevel(logging.INFO)                     # 定义该handler级别
+    formatter = logging.Formatter('%(asctime)s  %(filename)s : %(levelname)s  %(message)s')  #定义该handler格式
+    console.setFormatter(formatter)
+    # Create an instance
+    logging.getLogger().addHandler(console)           # 实例化添加handler    
+
+def initialize():
+    logging_config()
+    num_emails = check_num_email() # 当前邮件数量
+    # num_emails = check_num_email()  当前邮件数量
+    logging.info("当前邮件数量：" + str(num_emails))
+    while(True):
+        time.sleep(10)
+        new_num_emails = check_num_email()
+        logging.info("当前邮件数量：" + str(new_num_emails))
+        if new_num_emails > num_emails:
+            logging.info("收到新邮件，开始查看：")
+            check_email(new_num_emails - num_emails)
+            num_emails = new_num_emails

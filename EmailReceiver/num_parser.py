@@ -1,6 +1,9 @@
 chinese_number_dict = {'一':1, '七':7, '万':10000, '三':3, '九':9,'两':2, '二':2, '五':5, '八':8, '六':6, '十':10,'三':3, '千':1000, '四':4, '百':100, '零':0,"亿":100000000}
 not_in_decimal = "十百千万亿点"
+import re
 def ch2num(chstr):
+    if re.match("[0-9]+", chstr.replace(' ', '')):
+        return int(chstr)
     if '点' not in chstr:
         return ch2round(chstr)
     splits = chstr.split("点")
