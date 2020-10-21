@@ -1,0 +1,53 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+CONTENT	EmailReceiver/sender.py	/^CONTENT = {$/;"	v
+FetchEmail	EmailReceiver/emailReceiver.py	/^class FetchEmail():$/;"	c
+NOTRECEIVED	EmailReceiver/sender.py	/^    NOTRECEIVED = 4$/;"	v	class:TYPE
+SUCCESS	EmailReceiver/sender.py	/^    SUCCESS = 1$/;"	v	class:TYPE
+TITLE	EmailReceiver/sender.py	/^TITLE = {$/;"	v
+TYPE	EmailReceiver/sender.py	/^class TYPE(Enum):$/;"	c
+UPDATEFILE	EmailReceiver/sender.py	/^    UPDATEFILE = 2$/;"	v	class:TYPE
+WRONGTYPE	EmailReceiver/sender.py	/^    WRONGTYPE = 3$/;"	v	class:TYPE
+__init__	EmailReceiver/emailReceiver.py	/^    def __init__(self, mail_server, username, password):$/;"	m	class:FetchEmail
+_format_addr	EmailReceiver/sender.py	/^def _format_addr(s):$/;"	f
+add_item	EmailReceiver/dbConnect.py	/^def add_item(info, course_info, file_location, receive_time):$/;"	f
+ch2decimal	EmailReceiver/num_parser.py	/^def ch2decimal(chstr):$/;"	f
+ch2num	EmailReceiver/num_parser.py	/^def ch2num(chstr):$/;"	f
+ch2round	EmailReceiver/num_parser.py	/^def ch2round(chstr):$/;"	f
+check_email	EmailReceiver/mails.py	/^def check_email(num):$/;"	f
+check_exist	EmailReceiver/dbConnect.py	/^def check_exist(id, time):$/;"	f
+check_file	EmailReceiver/mails.py	/^def check_file(mail, emailid):$/;"	f
+check_filetype	EmailReceiver/dbConnect.py	/^def check_filetype(filetype):$/;"	f
+check_num_email	EmailReceiver/mails.py	/^def check_num_email():$/;"	f
+check_status	EmailReceiver/dbConnect.py	/^def check_status(info, date, subject, file_types, file_names, file_locations):$/;"	f
+chinese_number_dict	EmailReceiver/num_parser.py	/^chinese_number_dict = {'一':1, '七':7, '万':10000, '三':3, '九':9,'两':2, '二':2, '五':5, '八':8, '六':6, '十':10,'三':3, '千':1000, '四':4, '百':100, '零':0,"亿":100000000}$/;"	v
+close_connection	EmailReceiver/emailReceiver.py	/^    def close_connection(self):$/;"	m	class:FetchEmail
+config	EmailReceiver/emailReceiver.py	/^config = get_config_info()$/;"	v
+connect_database	EmailReceiver/dbConnect.py	/^def connect_database():$/;"	f
+connection	EmailReceiver/emailReceiver.py	/^    connection = None$/;"	v	class:FetchEmail
+email_host	EmailReceiver/emailReceiver.py	/^email_host = config['email']['host_imap']$/;"	v
+email_pass	EmailReceiver/emailReceiver.py	/^email_pass = config['email']['pass']$/;"	v
+email_port	EmailReceiver/emailReceiver.py	/^email_port = int(config['email']['port_imap'])$/;"	v
+email_user	EmailReceiver/emailReceiver.py	/^email_user = config['email']['id']$/;"	v
+emails	EmailReceiver/emailReceiver.py	/^emails = newEmailGetter.fetch_unread_messages()$/;"	v
+encoded_words_to_text	EmailReceiver/mails.py	/^def encoded_words_to_text(encoded_words):$/;"	f
+error	EmailReceiver/emailReceiver.py	/^    error = None$/;"	v	class:FetchEmail
+fetch_unread_messages	EmailReceiver/emailReceiver.py	/^    def fetch_unread_messages(self):$/;"	m	class:FetchEmail
+get_config_info	EmailReceiver/config_parser.py	/^def get_config_info():$/;"	f
+get_file	EmailReceiver/mails.py	/^def get_file(mail, subject, addr, info, date):$/;"	f
+get_file_name	EmailReceiver/mails.py	/^def get_file_name(rawfilename):$/;"	f
+get_mail_info	EmailReceiver/mails.py	/^def get_mail_info(mail):$/;"	f
+get_student_info	EmailReceiver/info_parser.py	/^def get_student_info(subject, course_name):$/;"	f
+initialize	EmailReceiver/mails.py	/^def initialize():$/;"	f
+logging_config	EmailReceiver/mails.py	/^def logging_config():$/;"	f
+msg	EmailReceiver/emailReceiver.py	/^    msg = email.message_from_bytes(data[0][1])$/;"	v
+newEmailGetter	EmailReceiver/emailReceiver.py	/^newEmailGetter = FetchEmail(email_host, email_user, email_pass)$/;"	v
+not_in_decimal	EmailReceiver/num_parser.py	/^not_in_decimal = "十百千万亿点"$/;"	v
+parse_email_address	EmailReceiver/emailReceiver.py	/^    def parse_email_address(self, email_address):$/;"	m	class:FetchEmail
+save_attachment	EmailReceiver/emailReceiver.py	/^    def save_attachment(self, msg, download_folder="\/tmp"):$/;"	m	class:FetchEmail
+send_email	EmailReceiver/sender.py	/^def send_email(name, to_addr, typ, content):$/;"	f
+set_logging	EmailReceiver/info_parser.py	/^def set_logging():$/;"	f
