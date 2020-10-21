@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import logging
 import imaplib
 import base64
@@ -57,11 +58,6 @@ def get_file(mail, subject, addr, info, date):
     for part in mail.walk():
         if part.get_content_maintype() != 'multipart' and part.get('Content-Disposition') is not None:
             logging.info("New file found in mail: " + subject)
-            
-                # TODO: 这里本来是 1. 确定文件名称和存放位置 2. 保存文件 3. 数据库添加
-                # file_location = outputdir + subject + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") +'.' + filetype
-                # open(file_location, 'wb').write(part.get_payload(decode=True))
-                # add_item(info, course, file_location, date)
             files.append(part)
 
     for index, raw_file in enumerate(files):
@@ -79,6 +75,7 @@ def get_file(mail, subject, addr, info, date):
         for item in zip(files, file_locations):
             open(item[1], 'wb').write(item[0].get_payload(decode=True))
     send_email(info[0], addr, send_info[0], send_info[1])
+    send_wechat(info[0], addr, send_info[0], send_info[1])
 
 def check_file(mail, emailid):
     logging.info("=============CHECK FILE==========")

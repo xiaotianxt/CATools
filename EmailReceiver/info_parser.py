@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import jieba
 import re
 import num_parser

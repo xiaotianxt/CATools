@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import configparser
 
 def get_config_info():

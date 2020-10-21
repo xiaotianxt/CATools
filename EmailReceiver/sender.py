@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 from email import encoders
 from email.header import Header
 from email.mime.text import MIMEText
@@ -31,6 +32,16 @@ def _format_addr(s):
     name, addr = parseaddr(s)
     return formataddr((Header(name, 'utf-8').encode(), addr))
 
+def send_wechat(name, to_addr, typ, content):
+    config = get_config_info()
+    if (config['wechat']['wechat']):
+        sckey = config['wechat']['sckey']
+        import json
+        from urllib import request
+        with request.urlopen(quote('https://sc.ftqq.com/'+sckey+'.send?text='+
+            TITLE[typ]+'&desp='+CONTENT[typ] % content+'成功报备',
+            safe='/:?=&')) as response:
+                    response = json.loads(response.read().decode('utf-8'))
 def send_email(name, to_addr, typ, content):
     # get config
     config = get_config_info()
@@ -50,8 +61,3 @@ def send_email(name, to_addr, typ, content):
     server.login(from_addr, password)
     server.sendmail(from_addr, [to_addr], msg.as_string())
     server.quit()
-
-# send_email("1241811980@qq.com", TYPE.SUCCESS, ("田雨沛", 1800012420, "file.jpg", "2020-03-15"))
-# send_email("1241811980@qq.com", TYPE.WRONGTYPE, ())
-# send_email("1241811980@qq.com", TYPE.SAMEFILE, ("田雨沛", 1800012420, "file.jpg", "2020-03-15"))
-# send_email("1241811980@qq.com", TYPE.NOTRECEIVED, ("12天", "123年"))

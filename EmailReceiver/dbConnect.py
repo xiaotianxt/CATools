@@ -1,3 +1,4 @@
+# -*- coding: UTF-8 -*-
 import sqlite3
 import logging
 from sender import *
