@@ -1,4 +1,5 @@
 # -*- coding: UTF-8 -*-
+from re import sub
 import jieba
 import re
 import num_parser
@@ -21,60 +22,88 @@ def set_logging():
     # Create an instance
     logging.getLogger().addHandler(console)           # 实例化添加handler
 
-# jieba.cut的默认参数只有三个,jieba源码如下
-# cut(self, sentence, cut_all=False, HMM=True)
-# 分别为:输入文本 是否为全模式分词 与是否开启HMM进行中文分词
+def get_student_info(subject):
+    logging.info("=============GET STUDENT INFO==========")
 
-def get_student_info(subject, course_name):
-    student_id, name, homework_num, notes = None, None, None, None
-    if (subject[0:2] == "Re" or subject[0:2] == "回复" or subject[0:2] == "答复"):
+    # 忽略回复邮件
+    if (subject[0:2].lower() == "re" or subject[0:2] == "回复" or subject[0:2] == "答复"):
+        logging.info("A reply email, ignore...")
         return None, None
-    logging.info("Raw subject: \"" + subject + "\"")
+
+
     subject = subject.replace(' ', '').replace('_', '').replace("答复", "").replace("Re", '').replace(':', '').replace('：', '').replace('转发', '').replace("Fw", '')
-    logging.info("Frist process: \"" + subject + "\"")
-    seg_list = list(jieba.cut(subject, cut_all=False, HMM=True))
     
+    # 匹配课程名称
+    course_names = get_config_info()['course']['name'].split(', ')
+    course_name = None
+    for course in course_names:
+        if course in subject:
+            course_name = course
+            subject = subject.replace(course, '')
+            break
+        else:
+            for seg in jieba.cut(course, cut_all=False, HMM=True):
+                if seg in subject:
+                    course_name = course
+                    subject = subject.replace(seg, '')
+    if course_name is None:
+        course_name = get_config_info()['course']['default_name']
+        logging.info("homework_type(default): " + course_name)
+    for seg in jieba.cut(course_name, cut_all=False, HMM=True):
+        subject = subject.replace(seg, '')
+    logging.info("homework_type: " + course_name)
+
+
+    student_id, name, homework_id, notes = None, None, None, None
+
+    seg_list = list(jieba.cut(subject, cut_all=False, HMM=True))
+
+    # 单独匹配第xx次作业
+    homework_id_re = re.match(r'[\s\S]*第([\s\S]+)次作业[\s\S]*', subject)
+    if (homework_id_re is not None):
+        homework_id = str(num_parser.ch2num(homework_id_re.groups()[0]))
+        logging.info("homework_id: " + homework_id)
+        subject = subject.replace("第"+homework_id_re.groups()[0]+"次作业", '')
+
+    # 匹配学号，作业编号
     for index, seg in enumerate(seg_list):
-        if re.match(r'[0-9]{10}', seg): # 首先匹配学号并删掉其他
+        if re.match(r'[0-9]{10}', seg): # 匹配学号并删掉其他
             student_id = seg
             subject = subject.replace(seg, '')
-            logging.info("Found student id: " + student_id)
-        elif seg == "作业": # 其次匹配作业后的数字并删掉
-            homework_num = str(num_parser.ch2num(seg_list[index+1]))
-            subject = subject.replace(seg_list[index+1], '').replace("作业", '')
-            logging.info("Found homework id: " + homework_num)
+            logging.info("student_id: " + student_id)
+            continue
+        if seg == "作业" and homework_id is None: # 其次匹配作业后的数字并删掉
+            try:
+                num = str(num_parser.ch2num(seg_list[index+1]))
+                if num != "None":
+                    homework_id = num
+                    subject = subject.replace(seg_list[index+1], '').replace("作业", '')
+            except:
+                logging.warning("homework_id: Wrong Index!")
+            
+            logging.info("homework_id: " + str(homework_id))
+
+    if (student_id is None or homework_id == ""):
+        logging.info("Not a homework, ignore")
+        return None, None
     
-    for seg in jieba.cut(course_name, cut_all=False, HMM=True):
-        try:
-            logging.info("Delete " + seg + " from "  + subject)
-            subject = subject.replace(seg, '')
-        except:
-            pass
 
-    try:     
-        notes_try = re.match(r"^[\s\S]*[（(\[「【{]([\s\S]*)[)\]}）】」][\s\S]*$", subject)
-
-        if notes_try is not None:
-            notes = notes_try.groups()[0]
-            logging.info("Found notes: " + notes)
-            logging.info("Deleting notes and brackets from " + subject)
-            subject = subject.replace(notes, '').replace('(', '').replace(')', '').replace('[', '').replace(']', '').replace('{', '').replace('}', '').replace('（', '').replace('）', '').replace('【', '').replace('】', '').replace('「', '').replace('」', '')
-        else:
-            notes = None
-    except:
-        logging.info("Something wrong: ")
+    notes_try = re.match(r"^[\s\S]*[（(\[「【{]([\s\S]*)[)\]}）】」][\s\S]*$", subject)
+    if notes_try is not None:
+        notes = notes_try.groups()[0]
+        logging.info("Deleting notes and brackets from " + subject)
+        subject = subject.replace(notes, '').replace('(', '').replace(')', '').replace('[', '').replace(']', '').replace('{', '').replace('}', '').replace('（', '').replace('）', '').replace('【', '').replace('】', '').replace('「', '').replace('」', '')
+    else:
+        notes = None
+    logging.info("notes: " + str(notes))
     
     name = subject
-    logging.info("Get name: " + name)
-    if len(name) > 3:
-        logging.error("Wrong Name!!" + name)
-        
-    if (student_id is None or name is None or homework_num is None):
+    logging.info("name: " + str(name))
+    if len(name) > 4:
+        logging.error("The name is too long, error may happend" + name)
+    if (name is None or name == ""):
+        logging.info("Not a homework, ignore")
         return None, None
 
-    logging.info("学号：" + student_id)
-    logging.info("姓名：" + name)
-    logging.info("作业编号：" + homework_num)
-
-    logging.info("注释：" + notes if notes is not None else "无注释")
-    return student_id + name + "作业" + homework_num + "(" + notes + ")" if notes is not None else student_id + name + "作业" + homework_num, [name, student_id, homework_num, notes]
+    return student_id + name + "作业" + homework_id + "(" + notes + ")" if notes is not None else student_id + name + "作业" + homework_id, \
+        {'name':name, 'student_id':student_id, 'homework_id':homework_id, 'notes':notes, 'homework_type':course_name}

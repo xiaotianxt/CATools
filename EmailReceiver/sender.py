@@ -15,9 +15,16 @@ class TYPE(Enum):
     NOTRECEIVED = 4
 
 CONTENT = {
-    TYPE.SUCCESS: "已成功收到您的作业！\n  姓名：%s\n  学号：%s\n  作业科目：%s\n  作业编号：%s\n  文件名：%s\n  发送时间：%s",
-    TYPE.UPDATEFILE: "文件已更新！\n  姓名：%s\n  学号：%s\n  作业科目：%s\n  作业编号：%s\n  文件名：%s\n  发送时间：%s",
+    TYPE.SUCCESS: "已成功收到作业: \n\n\n\n  姓名：%s\n\n  学号：%s\n\n  作业科目：%s\n\n  作业编号：%s\n\n  文件名：%s\n\n  发送时间：%s",
+    TYPE.UPDATEFILE: "已更新作业: \n\n\n\n  姓名：%s\n\n  学号：%s\n\n  作业科目：%s\n\n  作业编号：%s\n\n  文件名：%s\n\n  发送时间：%s",
     TYPE.WRONGTYPE: "文件格式似乎有误，请重新发送正确版本！",
+    TYPE.NOTRECEIVED: "此邮件为定时发送，作业提交时间为%s，您还有%s可以完成！"
+}
+
+WECHAT_CONTENT = {
+    TYPE.SUCCESS: "已成功收到作业: \n\n  姓名：%s\n\n  学号：%s\n\n  作业科目：%s\n\n  作业编号：%s\n\n  文件名：%s\n\n  发送时间：%s",
+    TYPE.UPDATEFILE: "已更新作业: \n\n  姓名：%s\n\n  学号：%s\n\n  作业科目：%s\n\n  作业编号：%s\n\n  文件名：%s\n\n  发送时间：%s",
+    TYPE.WRONGTYPE: "文件格式有误，请重新发送正确版本！",
     TYPE.NOTRECEIVED: "此邮件为定时发送，作业提交时间为%s，您还有%s可以完成！"
 }
 
@@ -36,12 +43,22 @@ def send_wechat(name, to_addr, typ, content):
     config = get_config_info()
     if (config['wechat']['wechat']):
         sckey = config['wechat']['sckey']
-        import json
-        from urllib import request
-        with request.urlopen(quote('https://sc.ftqq.com/'+sckey+'.send?text='+
-            TITLE[typ]+'&desp='+CONTENT[typ] % content+'成功报备',
-            safe='/:?=&')) as response:
-                    response = json.loads(response.read().decode('utf-8'))
+        import urllib
+        print(TITLE[typ])
+        print(WECHAT_CONTENT[typ], content)
+        params={
+        'text': TITLE[typ],
+        'desp': WECHAT_CONTENT[typ] % content
+        }
+        data = urllib.parse.urlencode(params).encode('utf-8')
+        URL = "https://sc.ftqq.com/"+sckey+".send"
+        req = urllib.request.Request(URL, data)
+        with urllib.request.urlopen(req) as response:
+            print(response.read())
+
+
+
+
 def send_email(name, to_addr, typ, content):
     # get config
     config = get_config_info()

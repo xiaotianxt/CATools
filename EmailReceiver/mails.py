@@ -50,7 +50,7 @@ def get_file(mail, subject, addr, info, date):
     logging.info("get_file from:" + addr)
     config = get_config_info()
     outputdir = config['system']['outputdir']
-    course = config['course']['name']
+    # TODO: 更新info格式
     files = []
     file_types = []
     file_locations = []
@@ -71,11 +71,11 @@ def get_file(mail, subject, addr, info, date):
     logging.info(file_locations)
     send_info = check_status(info, date, subject, file_types, ", ".join(file_names), file_locations)
     if (send_info[0] != TYPE.WRONGTYPE):
-        add_item(info, course, ";".join(file_locations), date)
+        add_item(info, ";".join(file_locations), date)
         for item in zip(files, file_locations):
             open(item[1], 'wb').write(item[0].get_payload(decode=True))
-    send_email(info[0], addr, send_info[0], send_info[1])
-    send_wechat(info[0], addr, send_info[0], send_info[1])
+    send_email(info['name'], addr, send_info[0], send_info[1])
+    send_wechat(info['name'], addr, send_info[0], send_info[1])
 
 def check_file(mail, emailid):
     logging.info("=============CHECK FILE==========")
@@ -84,11 +84,11 @@ def check_file(mail, emailid):
     email_body = data[0][1]
     mail = email.message_from_bytes(email_body)
     subject, date, addr = get_mail_info(mail)
-    subject, info = get_student_info(subject, get_config_info()['course']['name'])
+    subject, info = get_student_info(subject)
     if info is None :
-        logging.info("No homework recieved.")
+        logging.info("Not a homework, ignore")
         return False
-    if check_exist(info[1], date) is True:
+    if check_exist(info['student_id'], date) is True:
         logging.info("Still same file.")
         return False
     if mail.get_content_maintype() != 'multipart':
@@ -154,15 +154,22 @@ def logging_config():
     logging.getLogger().addHandler(console)           # 实例化添加handler    
 
 def initialize():
+    jieba.setLogLevel(logging.INFO)
+
     logging_config()
-    num_emails = check_num_email() # 当前邮件数量
-    # num_emails = check_num_email()  当前邮件数量
-    logging.info("当前邮件数量：" + str(num_emails))
-    while(True):
-        time.sleep(10)
-        new_num_emails = check_num_email()
-        logging.info("当前邮件数量：" + str(new_num_emails))
-        if new_num_emails > num_emails:
-            logging.info("收到新邮件，开始查看：")
-            check_email(new_num_emails - num_emails)
-            num_emails = new_num_emails
+    if get_config_info()['system']['mode'] == 'listener':
+        num_emails = check_num_email() # 当前邮件数量
+        # num_emails = check_num_email()  当前邮件数量
+        logging.info("当前邮件数量：" + str(num_emails))
+        while(True):
+            time.sleep(10)
+            new_num_emails = check_num_email()
+            logging.info("当前邮件数量：" + str(new_num_emails))
+            if new_num_emails > num_emails:
+                logging.info("收到新邮件，开始查看：")
+                check_email(new_num_emails - num_emails)
+                num_emails = new_num_emails
+    else:
+        num = int(get_config_info()['system']['viewer_num'])
+        if num > 0:
+            check_email(num)
