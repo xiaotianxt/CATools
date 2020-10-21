@@ -66,7 +66,7 @@ def check_status(info, date, subject, file_types, file_names, file_locations):
     conn, cursor = connect_database()
     order = "select * from emails where " + \
         "student_id=\"" + info['student_id'] + \
-        "\" and homework_type=\"" + course + \
+        "\" and homework_type=\"" + info['homework_type'] + \
         "\" and homework_id=\"" + info['homework_id'] + "\";"
     logging.info("Using order: " + order)
     values = cursor.execute(order).fetchall()

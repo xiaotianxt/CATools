@@ -4,6 +4,8 @@ from email.header import Header
 from email.mime.text import MIMEText
 from email.utils import parseaddr, formataddr
 from config_parser import *
+import logging
+import urllib
 import smtplib
 import socket
 from enum import Enum
@@ -47,11 +49,12 @@ def send_wechat(name, to_addr, typ, content):
         print(TITLE[typ])
         print(WECHAT_CONTENT[typ], content)
         params={
-        'text': TITLE[typ],
+        'text': name + " " + to_addr + " " +TITLE[typ],
         'desp': WECHAT_CONTENT[typ] % content
         }
         data = urllib.parse.urlencode(params).encode('utf-8')
         URL = "https://sc.ftqq.com/"+sckey+".send"
+        logging.info("wechat request: " + URL)
         req = urllib.request.Request(URL, data)
         with urllib.request.urlopen(req) as response:
             print(response.read())
