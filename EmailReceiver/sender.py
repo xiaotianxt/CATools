@@ -79,7 +79,7 @@ def send_email(name, to_addr, typ, content):
     msg['Subject'] = Header(TITLE[typ], 'utf-8').encode()
 
     # send email
-    server = smtplib.SMTP(smtp_server, 25)
+    server = smtplib.SMTP_SSL(smtp_server, 465)
     server.set_debuglevel(1)
     server.login(from_addr, password)
     server.sendmail(from_addr, [to_addr], msg.as_string())
