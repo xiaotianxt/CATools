@@ -90,6 +90,9 @@ def check_status(info, date, subject, file_types, file_names, file_locations):
             # 删除之前保存的文件
             for old_file_location in old_file_locations:
                 os.remove(old_file_location)
+            cursor.close()
+            conn.commit()
+            conn.close()
             return [TYPE.UPDATEFILE, (info['name'], info['student_id'], info['homework_type'], info['homework_id'], file_names, date)]
     else:
         logging.error("Database Error!")

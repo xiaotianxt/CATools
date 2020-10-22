@@ -42,13 +42,14 @@ def _format_addr(s):
     return formataddr((Header(name, 'utf-8').encode(), addr))
 
 def send_wechat(name, to_addr, typ, content):
+    logging.info("==========SEND WECHAT NOTIFICATION=======")
     config = get_config_info()
     if (config['wechat']['wechat']):
         sckey = config['wechat']['sckey']
         from urllib import request
         from urllib import parse
-        print(TITLE[typ])
-        print(WECHAT_CONTENT[typ], content)
+        logging.info(TITLE[typ])
+        logging.info(WECHAT_CONTENT[typ] % content)
         params={
         'text': name + " " + to_addr + " " +TITLE[typ],
         'desp': WECHAT_CONTENT[typ] % content
@@ -64,6 +65,7 @@ def send_wechat(name, to_addr, typ, content):
 
 
 def send_email(name, to_addr, typ, content):
+    logging.info("============SEND EMAIL===========")
     # get config
     config = get_config_info()
     from_addr = config['email']['id']
@@ -82,3 +84,21 @@ def send_email(name, to_addr, typ, content):
     server.login(from_addr, password)
     server.sendmail(from_addr, [to_addr], msg.as_string())
     server.quit()
+
+
+def send_warning(e):
+    config = get_config_info()
+    if (config['wechat']['wechat']):
+        sckey = config['wechat']['sckey']
+        from urllib import request
+        from urllib import parse
+        params={
+        'text': "服务器掉线啦",
+        'desp': "快来康康吧, 故障如下：\n\n" + str(e)
+        }
+        data = parse.urlencode(params).encode('utf-8')
+        URL = "https://sc.ftqq.com/"+sckey+".send"
+        logging.info("wechat request: " + URL)
+        req = request.Request(URL, data)
+        with request.urlopen(req) as response:
+            print(response.read())

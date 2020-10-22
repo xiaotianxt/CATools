@@ -155,14 +155,14 @@ def logging_config():
 
 def initialize():
     jieba.setLogLevel(logging.INFO)
-
     logging_config()
     if get_config_info()['system']['mode'] == 'listener':
+        interval = int(get_config_info()['system']['interval'])
         num_emails = check_num_email() # 当前邮件数量
         # num_emails = check_num_email()  当前邮件数量
         logging.info("当前邮件数量：" + str(num_emails))
         while(True):
-            time.sleep(10)
+            time.sleep(interval)
             new_num_emails = check_num_email()
             logging.info("当前邮件数量：" + str(new_num_emails))
             if new_num_emails > num_emails:

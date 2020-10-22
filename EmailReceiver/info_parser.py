@@ -1,4 +1,5 @@
 # -*- coding: UTF-8 -*-
+from math import e
 from re import sub
 import jieba
 import re
@@ -30,7 +31,6 @@ def get_student_info(subject):
         logging.info("A reply email, ignore...")
         return None, None
 
-
     subject = subject.replace(' ', '').replace('_', '').replace("答复", "").replace("Re", '').replace(':', '').replace('：', '').replace('转发', '').replace("Fw", '')
     
     # 匹配课程名称
@@ -52,10 +52,9 @@ def get_student_info(subject):
     for seg in jieba.cut(course_name, cut_all=False, HMM=True):
         subject = subject.replace(seg, '')
     logging.info("homework_type: " + course_name)
-
-
     student_id, name, homework_id, notes = None, None, None, None
 
+    # 切割主题
     seg_list = list(jieba.cut(subject, cut_all=False, HMM=True))
 
     # 单独匹配第xx次作业
@@ -78,8 +77,8 @@ def get_student_info(subject):
                 if num != "None":
                     homework_id = num
                     subject = subject.replace(seg_list[index+1], '').replace("作业", '')
-            except:
-                logging.warning("homework_id: Wrong Index!")
+            except BaseException as e:
+                logging.warning("homework_id: " + e)
             
             logging.info("homework_id: " + str(homework_id))
 
