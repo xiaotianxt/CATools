@@ -45,18 +45,19 @@ def send_wechat(name, to_addr, typ, content):
     config = get_config_info()
     if (config['wechat']['wechat']):
         sckey = config['wechat']['sckey']
-        import urllib
+        from urllib import request
+        from urllib import parse
         print(TITLE[typ])
         print(WECHAT_CONTENT[typ], content)
         params={
         'text': name + " " + to_addr + " " +TITLE[typ],
         'desp': WECHAT_CONTENT[typ] % content
         }
-        data = urllib.parse.urlencode(params).encode('utf-8')
+        data = parse.urlencode(params).encode('utf-8')
         URL = "https://sc.ftqq.com/"+sckey+".send"
         logging.info("wechat request: " + URL)
-        req = urllib.request.Request(URL, data)
-        with urllib.request.urlopen(req) as response:
+        req = request.Request(URL, data)
+        with request.urlopen(req) as response:
             print(response.read())
 
 
