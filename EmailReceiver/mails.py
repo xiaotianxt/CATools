@@ -169,6 +169,8 @@ def initialize():
                 logging.info("收到新邮件，开始查看：")
                 check_email(new_num_emails - num_emails)
                 num_emails = new_num_emails
+            elif new_num_emails < num_emails:
+                num_emails = new_num_emails
     else:
         num = int(get_config_info()['system']['viewer_num'])
         if num > 0:

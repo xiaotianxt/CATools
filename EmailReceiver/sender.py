@@ -1,4 +1,5 @@
 # -*- coding: UTF-8 -*-
+from greetings import *
 from email import encoders
 from email.header import Header
 from email.mime.text import MIMEText
@@ -73,7 +74,7 @@ def send_email(name, to_addr, typ, content):
     smtp_server = config['email']['host_smtp']
 
     # solve message
-    msg = MIMEText(CONTENT[typ] % content, 'plain', 'utf-8')
+    msg = MIMEText(get_greeting() + CONTENT[typ] % content, 'plain', 'utf-8')
     msg['From'] = _format_addr('小田 <%s>' % from_addr)
     msg['To'] = _format_addr('%s <%s>' % (name, to_addr))
     msg['Subject'] = Header(TITLE[typ], 'utf-8').encode()

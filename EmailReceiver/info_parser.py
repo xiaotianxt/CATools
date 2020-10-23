@@ -55,7 +55,7 @@ def get_student_info(subject):
     student_id, name, homework_id, notes = None, None, None, None
 
     # 切割主题
-    seg_list = list(jieba.cut(subject, cut_all=False, HMM=True))
+    seg_list = list(jieba.cut(subject, cut_all=True, HMM=False))
 
     # 单独匹配第xx次作业
     homework_id_re = re.match(r'[\s\S]*第([\s\S]+)次作业[\s\S]*', subject)

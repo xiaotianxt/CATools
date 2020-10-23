@@ -6,7 +6,8 @@ from config_parser import *
 import os
 
 def connect_database():
-    conn = sqlite3.connect('data/emails.db')
+    dblocation = get_config_info()['system']['db_location']
+    conn = sqlite3.connect(dblocation)
     cursor = conn.cursor()
     return conn, cursor
 
