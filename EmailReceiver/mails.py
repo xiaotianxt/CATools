@@ -65,7 +65,9 @@ def get_file(mail, subject, addr, info, date):
         file_type = file_name.split('.')[-1]
         file_names.append(file_name)
         file_types.append(file_type)
-        file_locations.append(outputdir + subject + "_" + str(index+1) + "." + file_type)
+        file_locations.append(outputdir + info['homework_type'] + '/' + subject + ("_" + str(index+1) if len(files)
+            > 1 else "") + "." + file_type)
+
     logging.info(file_types)
     logging.info(file_names)
     logging.info(file_locations)
