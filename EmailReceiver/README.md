@@ -1,4 +1,4 @@
-#Email Receiver
+# Email Receiver
 一个用于自动收取作业的bot
 
 因为不想手动收作业，所以花费比手动收作业多n倍的时间开发了一个自动收发作业bot。
