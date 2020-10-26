@@ -2,8 +2,8 @@
 import datetime
 import random
 
-GG = ["早安", "你好", "晚安"]
-XX = ["早八", "读书", "熬夜"]
+GG = ["早安", "你好", "晚上好", "晚安"]
+XX = ["早八", "读书", "读书", "熬夜"]
 
 GREETINGS = [\
         "XX人，XX魂，XX都是人上人。", \
@@ -28,10 +28,13 @@ def get_greeting():
         # Morning:
         G = GG[0]
         X = XX[0]
-    elif current_hour >= 10 and current_hour <= 23:
+    elif current_hour >= 10 and current_hour < 19:
         G = GG[1]
         X = XX[1]
-    else:
+    elif current_hour >= 19 and current_hour < 23:
         G = GG[2]
         X = XX[2]
+    else:
+        G = GG[3]
+        X = XX[3]
     return context.replace("XX", X).replace("GG", G)+ " " + G + "，" + X + "人！\n\n"

@@ -16,26 +16,30 @@ class TYPE(Enum):
     UPDATEFILE = 2
     WRONGTYPE = 3
     NOTRECEIVED = 4
+    WRONGTITLE = 5
 
 CONTENT = {
-    TYPE.SUCCESS: "已成功收到作业: \n\n\n\n  姓名：%s\n\n  学号：%s\n\n  作业科目：%s\n\n  作业编号：%s\n\n  文件名：%s\n\n  发送时间：%s",
-    TYPE.UPDATEFILE: "已更新作业: \n\n\n\n  姓名：%s\n\n  学号：%s\n\n  作业科目：%s\n\n  作业编号：%s\n\n  文件名：%s\n\n  发送时间：%s",
+    TYPE.SUCCESS: "已成功收到作业: \n\n  姓名：%s\n\n  学号：%s\n\n  作业科目：%s\n\n  作业编号：%s\n\n  文件名：%s\n\n  发送时间：%s",
+    TYPE.UPDATEFILE: "已更新作业: \n\n  姓名：%s\n\n  学号：%s\n\n  作业科目：%s\n\n  作业编号：%s\n\n  文件名：%s\n\n  发送时间：%s",
     TYPE.WRONGTYPE: "文件格式似乎有误，请重新发送正确版本！",
-    TYPE.NOTRECEIVED: "此邮件为定时发送，作业提交时间为%s，您还有%s可以完成！"
+    TYPE.NOTRECEIVED: "此邮件为定时发送，作业提交时间为%s，您还有%s可以完成！",
+    TYPE.WRONGTITLE: "您似乎给我发了作业，但邮件主题未按格式填写。可以检查后，重新发过来试试哦！"
 }
 
 WECHAT_CONTENT = {
     TYPE.SUCCESS: "已成功收到作业: \n\n  姓名：%s\n\n  学号：%s\n\n  作业科目：%s\n\n  作业编号：%s\n\n  文件名：%s\n\n  发送时间：%s",
     TYPE.UPDATEFILE: "已更新作业: \n\n  姓名：%s\n\n  学号：%s\n\n  作业科目：%s\n\n  作业编号：%s\n\n  文件名：%s\n\n  发送时间：%s",
     TYPE.WRONGTYPE: "文件格式有误，请重新发送正确版本！",
-    TYPE.NOTRECEIVED: "此邮件为定时发送，作业提交时间为%s，您还有%s可以完成！"
+    TYPE.NOTRECEIVED: "此邮件为定时发送，作业提交时间为%s，您还有%s可以完成！",
+    TYPE.WRONGTITLE: "\n\n您似乎给我发了作业，但邮件主题未按格式填写。可以检查后，重新发过来试试哦！"
 }
 
 TITLE = {
     TYPE.SUCCESS: "【自动回复】作业已收到",
     TYPE.UPDATEFILE: "【自动回复】作业已更新",
     TYPE.WRONGTYPE: "【自动回复】作业已收到，文件格式有误",
-    TYPE.NOTRECEIVED: "【定时发送】作业上交提醒"
+    TYPE.NOTRECEIVED: "【定时发送】作业上交提醒",
+    TYPE.WRONGTITLE: "【定时发送】邮件格式有误"
 }
 
 def _format_addr(s):
@@ -62,19 +66,18 @@ def send_wechat(name, to_addr, typ, content):
         with request.urlopen(req) as response:
             print(response.read())
 
-
-
-
 def send_email(name, to_addr, typ, content):
     logging.info("============SEND EMAIL===========")
     # get config
     config = get_config_info()
+    if (not bool(config['system']['autoreply'])):
+        return
     from_addr = config['email']['id']
     password = config['email']['pass']
     smtp_server = config['email']['host_smtp']
 
     # solve message
-    msg = MIMEText(get_greeting() + CONTENT[typ] % content, 'plain', 'utf-8')
+    msg = MIMEText(CONTENT[typ] % content + "\n\n\n\n" + '-'*10 + '\n\n' + get_greeting(), 'plain', 'utf-8')
     msg['From'] = _format_addr('小田 <%s>' % from_addr)
     msg['To'] = _format_addr('%s <%s>' % (name, to_addr))
     msg['Subject'] = Header(TITLE[typ], 'utf-8').encode()

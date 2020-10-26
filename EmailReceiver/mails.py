@@ -27,10 +27,12 @@ def encoded_words_to_text(encoded_words):
     return byte_string.decode(charset)
 
 def get_mail_info(mail):
+    logging.info("=======GET MAIL INFO======")
     subject = mail.get("Subject")
     realsubject = ""
     for sub in subject.split():
         realsubject += encoded_words_to_text(sub)
+    logging.info(mail.get("From"))
     from_addr_regex = r'[\s\S]*<([\s\S]*)>[\s\S]*'
     addr = re.match(from_addr_regex, mail.get("From")).groups()[0]
     date = mail.get("Date")
@@ -65,7 +67,10 @@ def get_file(mail, subject, addr, info, date):
         file_type = file_name.split('.')[-1]
         file_names.append(file_name)
         file_types.append(file_type)
-        file_locations.append(outputdir + info['homework_type'] + '/' + subject + ("_" + str(index+1) if len(files)
+        path = outputdir + info['homework_type'] + '/' + info['homework_id'] + '/'
+        if not os.path.exists(path):
+            os.makedirs(path)
+        file_locations.append(path + subject + ("_" + str(index+1) if len(files)
             > 1 else "") + "." + file_type)
 
     logging.info(file_types)
@@ -89,6 +94,9 @@ def check_file(mail, emailid):
     subject, info = get_student_info(subject)
     if info is None :
         logging.info("Not a homework, ignore")
+        return False
+    if info == TYPE.WRONGTITLE:
+        send_email("WAY", addr, info, ())
         return False
     if check_exist(info['student_id'], date) is True:
         logging.info("Still same file.")
