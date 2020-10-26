@@ -39,7 +39,7 @@ TITLE = {
     TYPE.UPDATEFILE: "【自动回复】作业已更新",
     TYPE.WRONGTYPE: "【自动回复】作业已收到，文件格式有误",
     TYPE.NOTRECEIVED: "【定时发送】作业上交提醒",
-    TYPE.WRONGTITLE: "【定时发送】邮件格式有误"
+    TYPE.WRONGTITLE: "【自动回复】邮件格式有误"
 }
 
 def _format_addr(s):

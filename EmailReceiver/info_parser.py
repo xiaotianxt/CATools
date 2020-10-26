@@ -1,4 +1,5 @@
 # -*- coding: UTF-8 -*-
+from logging import DEBUG
 from math import e
 from re import sub
 import jieba
@@ -8,21 +9,6 @@ from config_parser import *
 import logging
 import time, datetime
 from sender import *
-
-def set_logging():
-    logging.basicConfig(
-                        level    = logging.DEBUG,              # 定义输出到文件的log级别，                                                            
-                        format   = '%(asctime)s  %(filename)s : %(levelname)s  %(message)s',    # 定义输出log的格式
-                        datefmt  = '%Y-%m-%d %A %H:%M:%S',                                     # 时间
-                        filename = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '.log',                # log文件名
-                        filemode = 'w')
-     # Define a Handler and set a format which output to console
-    console = logging.StreamHandler()                  # 定义console handler
-    console.setLevel(logging.INFO)                     # 定义该handler级别
-    formatter = logging.Formatter('%(asctime)s  %(filename)s : %(levelname)s  %(message)s')  #定义该handler格式
-    console.setFormatter(formatter)
-    # Create an instance
-    logging.getLogger().addHandler(console)           # 实例化添加handler
 
 def get_student_info(subject):
     logging.info("=============GET STUDENT INFO==========")
@@ -96,7 +82,7 @@ def get_student_info(subject):
     notes_try = re.match(r"^[\s\S]*[（(\[「【{]([\s\S]*)[)\]}）】」][\s\S]*$", subject)
     if notes_try is not None:
         notes = notes_try.groups()[0]
-        logging.info("Deleting notes and brackets from " + subject)
+        logging.debug("Deleting notes and brackets from " + subject)
         subject = subject.replace(notes, '').replace('(', '').replace(')', '').replace('[', '').replace(']', '').replace('{', '').replace('}', '').replace('（', '').replace('）', '').replace('【', '').replace('】', '').replace('「', '').replace('」', '')
     else:
         notes = None

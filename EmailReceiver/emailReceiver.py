@@ -75,17 +75,3 @@ class FetchEmail():
         return: tuple (name, address). Eg. ('John Doe', 'jdoe@example.com')
         """
         return email.utils.parseaddr(email_address)
-
-config = get_config_info()
-email_user = config['email']['id']
-email_pass = config['email']['pass']
-email_host = config['email']['host_imap']
-email_port = int(config['email']['port_imap'])
-
-
-newEmailGetter = FetchEmail(email_host, email_user, email_pass)
-
-emails = newEmailGetter.fetch_unread_messages()
-for email in emails:
-    msg = email.message_from_bytes(data[0][1])
-    newEmailGetter.save_attachment(msg)

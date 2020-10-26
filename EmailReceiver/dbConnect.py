@@ -12,12 +12,12 @@ def connect_database():
     return conn, cursor
 
 def check_exist(id, time):
-    logging.info("=============CHECK IF EXIST FROM DB==========")
+    logging.debug("=============CHECK IF EXIST FROM DB==========")
     conn, cursor = connect_database()
     order = "select * from emails where " + \
      "student_id = \"" + id +\
      "\" AND receive_time = \"" + time + "\";"
-    logging.info("Using order: " + order)
+    logging.debug("Using order: " + order)
     cursor.execute(order)
     values = cursor.fetchall()
     cursor.close()
@@ -30,7 +30,7 @@ def check_exist(id, time):
     return False
     
 def add_item(info, file_location, receive_time):
-    logging.info("=============ADD ITEM INTO DB==========")
+    logging.debug("=============ADD ITEM INTO DB==========")
     conn, cursor = connect_database() 
     order = "insert into emails values(" + \
         "\""+info['student_id']+"\", " + \
@@ -39,23 +39,23 @@ def add_item(info, file_location, receive_time):
         "\""+info['homework_id']+"\", " + \
         "\""+file_location+"\", " + \
         "\""+receive_time+"\");"
-    logging.info("Using order: " + order)
+    logging.debug("Using order: " + order)
     cursor.execute(order)
     cursor.close()
     conn.commit()
     conn.close()
 
 def check_filetype(filetype):
-    logging.info("=============CHECK FILETYPE==========")
+    logging.debug("=============CHECK FILETYPE==========")
     config = get_config_info()
     typelist = config['course']['filetype'].split(", ")
     if filetype in typelist:
         return True
-    logging.info("Not a correct type")
+    logging.debug("Not a correct type")
     return False
 
 def check_status(info, date, subject, file_types, file_names, file_locations):
-    logging.info("=============CHECK STATUS FROM DB==========")
+    logging.debug("=============CHECK STATUS FROM DB==========")
 
     # 首先检查文件格式是否符合规范，不合规范直接不收
     for file_type in file_types:
@@ -63,13 +63,13 @@ def check_status(info, date, subject, file_types, file_names, file_locations):
             return[TYPE.WRONGTYPE, ()]
 
     # 随后检查是否已经收到过这份作业，如果是对比版本
-    logging.info("=============CHECK IF UPDATE==========")
+    logging.debug("=============CHECK IF UPDATE==========")
     conn, cursor = connect_database()
     order = "select * from emails where " + \
         "student_id=\"" + info['student_id'] + \
         "\" and homework_type=\"" + info['homework_type'] + \
         "\" and homework_id=\"" + info['homework_id'] + "\";"
-    logging.info("Using order: " + order)
+    logging.debug("Using order: " + order)
     values = cursor.execute(order).fetchall()
     # 没有收到过，故直接返回保存状态
     if (len(values) == 0):
@@ -86,7 +86,7 @@ def check_status(info, date, subject, file_types, file_names, file_locations):
             order = "delete from emails where " + \
                 "student_id=\"" + info['student_id'] + \
                 "\" and homework_id=\"" + info['homework_id'] + "\";"
-            logging.info("Using order: " + order)
+            logging.debug("Using order: " + order)
             cursor.execute(order)
             # 删除之前保存的文件
             for old_file_location in old_file_locations:

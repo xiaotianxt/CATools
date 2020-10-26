@@ -5,9 +5,7 @@ import base64
 import os
 import email
 import re, quopri
-import num_parser
 import logging
-import datetime
 from dbConnect import *
 from config_parser import *
 from sender import *
@@ -73,9 +71,9 @@ def get_file(mail, subject, addr, info, date):
         file_locations.append(path + subject + ("_" + str(index+1) if len(files)
             > 1 else "") + "." + file_type)
 
-    logging.info(file_types)
-    logging.info(file_names)
-    logging.info(file_locations)
+    logging.debug(file_types)
+    logging.debug(file_names)
+    logging.debug(file_locations)
     send_info = check_status(info, date, subject, file_types, ", ".join(file_names), file_locations)
     if (send_info[0] != TYPE.WRONGTYPE):
         add_item(info, ";".join(file_locations), date)
@@ -124,14 +122,14 @@ def check_email(num):
     id_list = mail_ids.split()[-num:]
 
     for emailid in id_list:
-        logging.info("Checking email_id: " + str(emailid))
+        logging.debug("Checking email_id: " + str(emailid))
         check_file(mail, emailid)
 
     mail.close()
     mail.logout()
         
 def check_num_email():
-    logging.info("=============CHECK THE NUMBER OF EMAILS==========")
+    logging.debug("=============CHECK THE NUMBER OF EMAILS==========")
     config = get_config_info()
     email_user = config['email']['id']
     email_pass = config['email']['pass']
@@ -140,7 +138,7 @@ def check_num_email():
 
     mail = imaplib.IMAP4_SSL(email_host,email_port)
     mail.login(email_user, email_pass)
-    logging.info("Login successfully")
+    logging.debug("Login successfully")
     mail.select()
 
     typ, data = mail.search(None, "ALL")
@@ -150,18 +148,9 @@ def check_num_email():
 
 def logging_config():
     logging.basicConfig(
-                        level    = logging.DEBUG,              # 定义输出到文件的log级别，                                                            
+                        level    = logging.DEBUG if bool(get_config_info()['system']['debug']) else logging.INFO,              # 定义输出到文件的log级别，                                                            
                         format   = '%(asctime)s  %(filename)s : %(levelname)s  %(message)s',    # 定义输出log的格式
-                        datefmt  = '%Y-%m-%d %A %H:%M:%S',                                     # 时间
-                        filename = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + '.log',                # log文件名
-                        filemode = 'w')
-     # Define a Handler and set a format which output to console
-    console = logging.StreamHandler()                  # 定义console handler
-    console.setLevel(logging.INFO)                     # 定义该handler级别
-    formatter = logging.Formatter('%(asctime)s  %(filename)s : %(levelname)s  %(message)s')  #定义该handler格式
-    console.setFormatter(formatter)
-    # Create an instance
-    logging.getLogger().addHandler(console)           # 实例化添加handler    
+                        datefmt  = '%H:%M:%S')
 
 def initialize():
     jieba.setLogLevel(logging.INFO)
