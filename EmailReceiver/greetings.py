@@ -20,8 +20,7 @@ GREETINGS = [\
                 ]
 
 def get_greeting():
-        # current_hour = datetime.datetime.now().hour
-    current_hour = 19
+    current_hour = datetime.datetime.now().hour
     context = random.choice(GREETINGS)
 
     if current_hour < 10 and current_hour > 5:

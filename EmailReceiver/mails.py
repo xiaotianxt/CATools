@@ -32,7 +32,10 @@ def get_mail_info(mail):
         realsubject += encoded_words_to_text(sub)
     logging.info(mail.get("From"))
     from_addr_regex = r'[\s\S]*<([\s\S]*)>[\s\S]*'
-    addr = re.match(from_addr_regex, mail.get("From")).groups()[0]
+    try:
+        addr = re.match(from_addr_regex, mail.get("From")).groups()[0]
+    except:
+        addr = mail.get("From")
     date = mail.get("Date")
     return realsubject, date, addr
 

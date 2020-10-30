@@ -14,11 +14,12 @@ def get_student_info(subject):
     logging.info("=============GET STUDENT INFO==========")
 
     # 忽略回复邮件
-    if (subject[0:2].lower() == "re" or subject[0:2] == "回复" or subject[0:2] == "答复"):
+    if (subject[0:2].lower() == "re" or subject[0:2] == "回复" or subject[0:2] == "答复" or "自动回复" in subject):
         logging.info("A reply email, ignore...")
         return None, None
 
-    subject = subject.replace(' ', '').replace('_', '').replace("答复", "").replace("Re", '').replace(':', '').replace('：', '').replace('转发', '').replace("Fw", '')
+    subject = subject.replace(' ', '').replace('_', '').replace("答复", "").replace("Re", '').replace(':', '').replace('：',
+            '').replace('转发', '').replace("Fw", '').replace('-', '')
     
     # 匹配课程名称
     course_names = get_config_info()['course']['name'].split(', ')
